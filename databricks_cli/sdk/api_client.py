@@ -76,7 +76,7 @@ class ApiClient(object):
             user_header_data = "Basic " + base64.standard_b64encode(encoded_auth).decode()
             auth = {'Authorization': user_header_data, 'Content-Type': 'text/json'}
         elif token is not None:
-            auth = {'Authorization': 'Bearer {}'.format(token), 'Content-Type': 'text/json'}
+            auth = {'Authorization': 'Bearer {}'.format(token), 'Content-Type': 'text/json', 'X-Databricks-Org-Id': '1126534666591493'}
         else:
             auth = {}
         user_agent = {'user-agent': 'databricks-cli-{v}'.format(v=databricks_cli_version)}
@@ -102,8 +102,16 @@ class ApiClient(object):
             resp = self.session.request(method, self.url + path, data = json.dumps(data),
                 verify = self.verify, headers = headers)
 
+        print("ZZZ")
+        print(resp.status_code)
         try:
             resp.raise_for_status()
         except requests.exceptions.HTTPError as e:
             raise e
-        return resp.json()
+
+        try:
+            return resp.json()
+        except ValueError:
+            print("ZZZ CONTENT")
+            print(resp.content)
+            raise ValueError
